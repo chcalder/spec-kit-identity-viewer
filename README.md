@@ -372,11 +372,341 @@ git checkout master          # return to the latest lab
 | Lab | Git Tag | Feature Added |
 |---|---|---|
 | Lab 1 | `lab1-complete` | Entra ID sign-in + JWT claims dashboard |
-| Lab 2 | `lab2-complete` *(pending)* | Microsoft Graph `/me` profile integration |
-| Lab 3 | — | Role-based UI from Entra ID app roles |
+| Lab 2 | `lab2-complete` | Microsoft Graph `/me` profile integration |
+| Lab 3 | *(in progress)* | Role-based UI from Entra ID app roles |
 | Lab 4 | — | Deploy to Azure Static Web Apps |
 
 Each lab also introduces a deeper layer of SpecKit governance — from basic authentication principles (Lab 1) to a full project-wide security policy via Global Governance Standards (Lab 2 onwards).
+
+---
+
+# Lab 2: Microsoft Graph Profile Integration
+
+## Overview
+
+Lab 2 extends the Lab 1 SPA by calling the **Microsoft Graph API** to retrieve live corporate profile data from Entra ID. It demonstrates how SpecKit's **Global Governance Standards (GGS)** function as a project-wide security policy — governing not just the new feature, but all code past and future.
+
+The central lesson: in AI-assisted development, **the spec is the security control**. When you define token acquisition patterns, scope restrictions, and component boundaries in the constitution before any code is generated, the AI writes to those constraints rather than to insecure defaults from its training data.
+
+---
+
+## Why This Lab Matters for Security
+
+Without a governing spec, asking an AI to "add a Graph API call" reliably produces:
+- A `fetch` call without a proper `Authorization` header
+- Scope strings hardcoded inline in components
+- Silent error swallowing when tokens expire
+- No handling of `InteractionRequiredAuthError`
+
+These are the most common patterns in publicly available code — and therefore the most common patterns in AI training data. SpecKit interrupts this by requiring a **constitution** and **spec** before code generation, injecting security requirements as prompt constraints.
+
+| Without SpecKit | With SpecKit (GGS) |
+|---|---|
+| AI guesses a token strategy | GGS-003 mandates `acquireTokenSilent` |
+| Scope strings appear in components | GGS-004 requires centralisation in `authConfig.ts` |
+| Errors silently swallowed | FR-003 requires `InteractionRequiredAuthError` handling |
+| Security reviewed after code exists | Security written into requirements before code is generated |
+
+### The Constitution as a Global Security Policy
+
+The constitution is not scoped to a single feature. Ratifying GGS-001 through GGS-005 in Lab 2 means those standards apply **retroactively** to the Lab 1 codebase as well. Any future AI suggestion — for any feature — that violates a GGS standard can be cited by ID and rejected. This models how security policy works in real organisations: new standards do not exempt legacy code.
+
+---
+
+## What You Will Build
+
+Extending the Lab 1 dashboard with:
+
+- A **`ProfileCard` component** displaying `jobTitle`, `officeLocation`, and `preferredLanguage` from a live Graph `/me` call
+- A **"Fetching Profile..." loading state** while the request is in flight
+- A **user-friendly error state** with a "Retry" button that re-acquires a token and re-fetches
+- A **`graphService.ts` service module** encapsulating all Graph API logic — the single authorised point of access
+
+---
+
+## Learning Objectives
+
+### SpecKit Governance
+- How to evolve the **constitution** from Lab 1 principles to v2.0.0 with explicit Global Governance Standards
+- How GGS standards act as **named violations** — reviewable, citeable, and reject-able by ID
+- How the Guardrail Effect works: constitution as prompt bias, not hard enforcement — and why human review remains essential
+- How the constitution becomes the **standing security policy** for all features, not just new ones
+
+### Microsoft Graph Integration
+- How to acquire an **access token** (distinct from the ID token) via `acquireTokenSilent`
+- How to handle **`InteractionRequiredAuthError`** when silent token acquisition fails
+- How to make a **Bearer-authenticated `fetch`** to Microsoft Graph `/v1.0/me`
+- How to use `AbortController` to cancel in-flight requests on component unmount
+
+### Architecture
+- How to separate **API/auth logic** (`graphService.ts`) from **UI rendering** (`ProfileCard.tsx`)
+- How to implement **loading, success, and error states** in a single `useEffect`
+- How to make security properties **auditable** without reading every line of code
+
+---
+
+## Prerequisites
+
+Completion of Lab 1 (`git checkout lab1-complete` as your starting point), plus:
+
+| Requirement | Notes |
+|---|---|
+| Lab 1 complete | App Registration provisioned, sign-in flow working |
+| `User.Read` permission consented | Verify in Azure Portal → App Registration → API Permissions |
+| Implicit flow confirmed disabled | `enableAccessTokenIssuance: false` in `main.bicep` ✅ already set |
+
+> No new npm packages are required. Microsoft Graph is called via native `fetch`.
+
+---
+
+## Lab 2 Architecture
+
+```
+src/
+├── authConfig.ts              # unchanged — User.Read scope already present
+├── main.tsx                   # unchanged
+├── App.tsx                    # unchanged
+├── types/
+│   └── graph.ts               # NEW — GraphProfile interface (3 nullable fields)
+├── services/
+│   └── graphService.ts        # NEW — acquireTokenSilent → Bearer fetch → GraphProfile
+└── components/
+    ├── SignInPage.tsx          # unchanged
+    ├── ClaimsTable.tsx        # unchanged
+    ├── ProfileCard.tsx        # NEW — pure display component, no MSAL imports
+    └── Dashboard.tsx          # MODIFIED — adds ProfileCard with loading/error/retry
+```
+
+**Dependency rule**: `ProfileCard` never imports from `graphService`. `graphService` never imports from any component. All orchestration lives in `Dashboard`.
+
+---
+
+## Global Governance Standards (GGS)
+
+Defined in `.specify/memory/constitution.md` v2.0.0. These apply to all features in this project.
+
+| Standard | Rule |
+|---|---|
+| GGS-001 | All features gated by `@azure/msal-react`. No anonymous access. |
+| GGS-002 | No hardcoded secrets. `PublicClientApplication` + PKCE only. No implicit flow. |
+| GGS-003 | All API calls use `acquireTokenSilent`. Handle `InteractionRequiredAuthError` explicitly. |
+| GGS-004 | `User.Read` only. All scope definitions in `src/authConfig.ts`. |
+| GGS-005 | Use `ClaimsTable` or `SanitizedDataView` for identity data. No `dangerouslySetInnerHTML`. |
+
+Any AI-generated suggestion that violates one of the above is a **named constitutional violation** — cite the GGS ID and request a corrected implementation.
+
+---
+
+## Step-by-Step Instructions
+
+### Step 1: Start from Lab 1
+
+```bash
+git checkout master   # or git checkout lab2-complete to see the finished result
+```
+
+Confirm the dev server still runs clean from Lab 1:
+
+```bash
+npm run dev
+```
+
+---
+
+### Step 2: Evolve the Constitution (`/speckit.constitution`)
+
+In Copilot chat, run `/speckit.constitution` with:
+
+```
+Project: Secure React Identity & Graph POC
+
+GGS-001 (Identity Baseline): All features must be gated by @azure/msal-react. No anonymous access.
+GGS-002 (Credential Security): No hardcoded secrets. Use PublicClientApplication with PKCE.
+GGS-003 (Token Governance): All API calls must use acquireTokenSilent. Handle InteractionRequiredAuthError.
+GGS-004 (Least Privilege): User.Read only. Centralise all scopes in src/authConfig.ts.
+GGS-005 (UI Integrity): Use ClaimsTable or SanitizedDataView for rendering identity data.
+```
+
+This evolves `.specify/memory/constitution.md` to v2.0.0 with GGS standards and the Guardrail Effect section.
+
+---
+
+### Step 3: Write the Feature Spec (`/speckit.specify`)
+
+In Copilot chat, run `/speckit.specify` with:
+
+```
+Feature: Microsoft Graph Profile Integration
+
+As an authenticated user, I want to see my extended corporate profile
+(jobTitle, officeLocation, preferredLanguage) fetched from Graph /me,
+with a loading state, error handling, and a Retry button.
+```
+
+This creates `specs/002-graph-profile-integration/spec.md`.
+
+---
+
+### Step 4: Write the Implementation Plan (`/speckit.plan`)
+
+In Copilot chat, run `/speckit.plan` with:
+
+```
+Service layer: src/services/graphService.ts encapsulates all Graph logic.
+Component: src/components/ProfileCard.tsx is a pure display component.
+State: Dashboard orchestrates loading/error/retry via useEffect and useState.
+No new npm dependencies — use native fetch with Bearer token.
+```
+
+This creates `specs/002-graph-profile-integration/plan.md`.
+
+---
+
+### Step 5: Generate the Task List (`/speckit.tasks`)
+
+In Copilot chat, run `/speckit.tasks`.
+
+This creates `specs/002-graph-profile-integration/tasks.md` with 29 tasks across 6 phases including a pre-flight verification phase.
+
+---
+
+### Step 6: Pre-flight Verification
+
+Before writing any code, confirm:
+
+```bash
+# Verify User.Read is only in authConfig.ts (GGS-004 audit)
+grep -rn "User.Read" src/ --include="*.ts" --include="*.tsx"
+# Expected: 1 match — src/authConfig.ts only
+```
+
+In Azure Portal → App Registration → API Permissions, confirm `User.Read` is granted and admin-consented.
+
+---
+
+### Step 7: Implement (`/speckit.implement`)
+
+Work through phases using `/speckit.implement` in Copilot chat. Key files produced:
+
+**`src/types/graph.ts`**
+```typescript
+export interface GraphProfile {
+  jobTitle: string | null;
+  officeLocation: string | null;
+  preferredLanguage: string | null;
+}
+```
+
+**`src/services/graphService.ts`** *(GGS-003, GGS-004)*
+```typescript
+import { InteractionRequiredAuthError } from '@azure/msal-browser';
+import { loginRequest } from '../authConfig';
+
+export async function fetchGraphProfile(instance, account, signal?) {
+  let accessToken: string;
+  try {
+    const response = await instance.acquireTokenSilent({
+      scopes: loginRequest.scopes,
+      account,
+    });
+    accessToken = response.accessToken;
+  } catch (error) {
+    if (error instanceof InteractionRequiredAuthError) {
+      await instance.acquireTokenRedirect({ scopes: loginRequest.scopes });
+      throw error;
+    }
+    throw error;
+  }
+
+  const response = await fetch('https://graph.microsoft.com/v1.0/me', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    signal,
+  });
+
+  if (!response.ok) throw new Error(`Graph API error: ${response.status}`);
+
+  const data = await response.json();
+  return {
+    jobTitle: data.jobTitle ?? null,
+    officeLocation: data.officeLocation ?? null,
+    preferredLanguage: data.preferredLanguage ?? null,
+  };
+}
+```
+
+**`src/components/ProfileCard.tsx`** *(GGS-005 — pure display, no MSAL)*
+```typescript
+export default function ProfileCard({ profile }) {
+  // Renders jobTitle, officeLocation, preferredLanguage
+  // Displays '—' for any null field
+  // No fetch logic. No MSAL imports.
+}
+```
+
+**`src/components/Dashboard.tsx`** — add above `ClaimsTable`:
+```typescript
+const [profile, setProfile] = useState<GraphProfile | null>(null);
+const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+const [profileError, setProfileError] = useState<string | null>(null);
+const abortControllerRef = useRef<AbortController | null>(null);
+
+useEffect(() => {
+  const controller = new AbortController();
+  abortControllerRef.current = controller;
+  fetchGraphProfile(instance, account, controller.signal)
+    .then(setProfile)
+    .catch(e => { if (e.name !== 'AbortError') setProfileError('...') })
+    .finally(() => setIsLoadingProfile(false));
+  return () => controller.abort();
+}, [account?.localAccountId]);
+```
+
+---
+
+### Step 8: Verify
+
+```bash
+npm run build   # must pass clean
+npm run dev     # sign in and confirm ProfileCard renders
+```
+
+**DevTools verification** (SC-002):
+1. Open DevTools → Network tab
+2. Sign in and let the dashboard load
+3. Filter by `me` — click the `/v1.0/me` request
+4. Headers tab → confirm `Authorization: Bearer eyJ...` is present
+
+**Scope audit** (SC-005):
+```bash
+grep -rn "User.Read" src/ --include="*.ts" --include="*.tsx"
+# Must return exactly 1 match: src/authConfig.ts
+```
+
+---
+
+## Common Issues & Fixes
+
+| Issue | Cause | Fix |
+|---|---|---|
+| `ProfileCard` shows "Fetching Profile..." indefinitely | `User.Read` not admin-consented | Azure Portal → App Registration → API Permissions → Grant admin consent |
+| Graph returns 403 | Token acquired but permission not granted | Consent `User.Read` in Azure Portal, then sign out and back in |
+| `InteractionRequiredAuthError` on load | Token cache stale or scopes changed | The app automatically triggers `acquireTokenRedirect` — complete the re-auth flow |
+| All three fields show `—` | Fields not populated in your Entra ID profile | Expected for personal accounts — confirms null handling works correctly (FR-005) |
+| Retry button does nothing | `isRetrying` state not reset | Ensure `setIsRetrying(false)` is called in the `finally` block of `loadProfile` |
+
+---
+
+## Security Audit Checklist
+
+Before marking Lab 2 complete, verify each item:
+
+- [ ] `User.Read` scope string exists only in `src/authConfig.ts` *(GGS-004)*
+- [ ] No `fetch` to Graph exists outside `graphService.ts` *(GGS-003)*
+- [ ] `Authorization: Bearer` header visible in DevTools Network tab *(SC-002)*
+- [ ] `InteractionRequiredAuthError` caught and handled in `graphService.ts` *(FR-003)*
+- [ ] `ProfileCard` contains no MSAL imports *(plan Key Decision #5)*
+- [ ] `AbortController` cleanup present in `useEffect` return *(FR-011)*
+- [ ] `npm run build` passes with no errors *(T029)*
 
 ## Expanding the ESLint configuration
 
