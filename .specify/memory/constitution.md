@@ -1,50 +1,61 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Secure React Identity & Graph POC Constitution
+
+## Infrastructure
+
+| Key | Value |
+|---|---|
+| Client ID | `YOUR_CLIENT_ID` |
+| Tenant ID | `YOUR_TENANT_ID` |
+| Authority | `https://login.microsoftonline.com/YOUR_TENANT_ID` |
+
+## Global Governance Standards (GGS)
+
+### GGS-001 — Identity Baseline
+All features must be gated by `@azure/msal-react`. No anonymous access is permitted anywhere in the application. Unauthenticated users must be redirected to the sign-in page before any protected content is rendered.
+
+### GGS-002 — Credential Security
+Absolute prohibition of hardcoded Client Secrets or API Keys. Use `PublicClientApplication` with Authorization Code Flow + PKCE exclusively. No implicit flow. No client credentials.
+
+### GGS-003 — Token Governance
+All API calls (including Microsoft Graph) MUST use the `acquireTokenSilent` pattern. Explicitly handle `InteractionRequiredAuthError` to trigger a login popup or redirect only when silent acquisition fails. Never call Graph or any protected API with a manually stored token.
+
+### GGS-004 — Least Privilege Scopes
+Scopes must be minimised to only what is required for the current feature. For Lab 2, use only `User.Read`. All scope definitions must be centralised in `src/authConfig.ts`. No ad-hoc scope strings in component code.
+
+### GGS-005 — UI Integrity
+Use the existing `ClaimsTable` component (or a consistent `SanitizedDataView` equivalent) for rendering all identity data. This prevents XSS and maintains architectural consistency. Never render raw token values via `dangerouslySetInnerHTML`.
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Authentication — Authorization Code Flow with PKCE Only
+Strictly use `@azure/msal-react` for all authentication. Authorization Code Flow with PKCE is the only permitted flow. No client secrets. No implicit flow. No access tokens issued via the browser implicit grant.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Architecture — Functional Components with Hooks
+All React components must be functional. Class components are prohibited. State, side effects, and auth context must be managed via React Hooks (`useState`, `useEffect`, `useMemo`, custom hooks).
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. UI — Tailwind CSS with Dark Mode
+All styling must use Tailwind CSS utility classes. A modern dark-mode UI is the default. No inline styles. No external CSS frameworks alongside Tailwind.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Security — No Secrets in Client Code
+No client secrets, tokens, or sensitive values may be hardcoded or committed. MSAL handles all token acquisition and storage. Token validation happens server-side or via Microsoft identity platform.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Simplicity — YAGNI
+Start simple. No over-engineering. Build only what is needed for the current feature. Complexity must be justified.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Technology Stack
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- **Auth**: `@azure/msal-react`, `@azure/msal-browser`
+- **Graph Client**: Microsoft Graph REST API via `acquireTokenSilent` + `fetch`
+- **UI Framework**: React (functional components + hooks)
+- **Styling**: Tailwind CSS (dark mode default)
+- **Language**: TypeScript
+- **Auth Flow**: Authorization Code Flow with PKCE
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other practices for this project. Any deviation requires explicit justification. All features must comply with both the GGS standards and core principles above. The GGS standards take precedence in the event of any conflict.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+### Scaffolding Safety Rule
+Never scaffold new tooling (Vite, CRA, etc.) into an existing project directory using destructive flags such as `--overwrite`. Always scaffold into a **new empty directory first**, then copy or merge files in. The `.specify/` and `specs/` directories must never be deleted or overwritten.
+
+**Version**: 2.0.0 | **Ratified**: 2026-04-05 | **Last Amended**: 2026-04-05

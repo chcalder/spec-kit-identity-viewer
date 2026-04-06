@@ -10,6 +10,7 @@ resource app 'Microsoft.Graph/applications@v1.0' = {
   spa: {
     redirectUris: [
       'http://localhost:3000'
+      'http://localhost:3001' // fallback when port 3000 is in use (Vite auto-increments)
     ]
   }
 
