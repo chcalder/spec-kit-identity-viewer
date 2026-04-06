@@ -3,7 +3,22 @@
 **Feature Branch**: `001-entra-signin-claims-dashboard`
 **Created**: 2026-04-05
 **Status**: Implemented
+**Lab**: Lab 1
 **Input**: User description: "Create a React SPA that allows a user to sign in via Microsoft Entra ID. After login, it should display a dashboard showing a 'Welcome [Name]' message and a table of all JWT claims from the ID token. Include a logout button."
+
+---
+
+## Lab 1 Intent
+
+In traditional software development, security requirements are often discovered late — in code review, penetration testing, or after a breach. In AI-assisted development, this problem is amplified: when a developer prompts an AI to "build a login page," the AI produces something that works, but the security properties of that output are entirely dependent on what was in the prompt.
+
+Lab 1 introduces **SpecKit** as the answer to this problem. Instead of prompting the AI directly for code, the developer first runs `/speckit.constitution` to establish governing principles — PKCE-only auth, no implicit flow, no hardcoded secrets, functional components — and then runs `/speckit.specify` to produce a reviewable feature specification before any code is written.
+
+The result is that security is no longer something added to code after the fact. It is written into the requirements. The AI then writes code *to those requirements*, and the spec becomes the audit trail proving it did so.
+
+**The core lesson**: Switching from prompt engineering ("write me a login page") to spec-driven development ("here is the specification — implement it") is not just a workflow improvement. It is a **security control**. SpecKit makes that switch systematic.
+
+---
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -102,7 +117,7 @@ The signed-in user can click a Logout button to end their session and return to 
 - **SC-001**: A user can complete the full sign-in → dashboard → logout flow without errors.
 - **SC-002**: The claims table displays a minimum of 8 standard Entra ID claims from the ID token.
 - **SC-003**: The app renders correctly in dark mode using Tailwind CSS with no unstyled content flash.
-- **SC-004**: No network requests to Microsoft Graph are required — all data comes from the cached ID token claims only.
+- **SC-004**: No network requests to Microsoft Graph are required for Lab 1 — all data comes from the cached ID token claims only. *(Note: Lab 2 intentionally introduces a live Graph `/me` call as the next step in the SpecKit SDLC workflow, governed by GGS-003 and GGS-004.)*
 
 ## Assumptions
 

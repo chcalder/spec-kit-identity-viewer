@@ -55,6 +55,21 @@ Start simple. No over-engineering. Build only what is needed for the current fea
 
 This constitution supersedes all other practices for this project. Any deviation requires explicit justification. All features must comply with both the GGS standards and core principles above. The GGS standards take precedence in the event of any conflict.
 
+### The Guardrail Effect
+This constitution serves as a **prompt bias and review standard**, not a hard technical constraint. It is injected as context for every SpecKit command, increasing the likelihood that AI-generated suggestions conform to these standards. It does not prevent non-compliant code from being generated or compiled — enforcement is human-in-the-loop.
+
+The following patterns are **named violations** that any reviewer (human or AI) should flag and reject:
+
+| Violation | Rule Broken |
+|---|---|
+| `fetch` call without `Authorization: Bearer <token>` from `acquireTokenSilent` | GGS-003 |
+| Hardcoded API key, client secret, or bearer token string | GGS-002 |
+| Scope string defined outside `src/authConfig.ts` | GGS-004 |
+| Identity data rendered without `ClaimsTable` or equivalent sanitised component | GGS-005 |
+| Any route or component accessible without MSAL authentication guard | GGS-001 |
+
+When a suggestion violates one of the above, cite the standard by ID (e.g. "GGS-003 violation") and request a corrected implementation before accepting the code.
+
 ### Scaffolding Safety Rule
 Never scaffold new tooling (Vite, CRA, etc.) into an existing project directory using destructive flags such as `--overwrite`. Always scaffold into a **new empty directory first**, then copy or merge files in. The `.specify/` and `specs/` directories must never be deleted or overwritten.
 

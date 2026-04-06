@@ -362,10 +362,21 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## What's Next
 
-Extend this lab by adding:
-- **Lab 2**: Call the Microsoft Graph `/me` endpoint to fetch additional profile data beyond the ID token claims
-- **Lab 3**: Add role-based UI — show different content based on Entra ID app roles
-- **Lab 4**: Deploy the app to Azure Static Web Apps with Entra ID authentication built-in
+This repository uses a **single-directory, git-tag-per-lab** strategy. Each lab builds on the previous one in the same codebase. Use git tags to navigate between completed lab states:
+
+```bash
+git checkout lab1-complete   # view the exact Lab 1 completion state
+git checkout master          # return to the latest lab
+```
+
+| Lab | Git Tag | Feature Added |
+|---|---|---|
+| Lab 1 | `lab1-complete` | Entra ID sign-in + JWT claims dashboard |
+| Lab 2 | `lab2-complete` *(pending)* | Microsoft Graph `/me` profile integration |
+| Lab 3 | — | Role-based UI from Entra ID app roles |
+| Lab 4 | — | Deploy to Azure Static Web Apps |
+
+Each lab also introduces a deeper layer of SpecKit governance — from basic authentication principles (Lab 1) to a full project-wide security policy via Global Governance Standards (Lab 2 onwards).
 
 ## Expanding the ESLint configuration
 
