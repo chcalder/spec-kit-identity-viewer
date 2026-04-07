@@ -373,7 +373,7 @@ git checkout master          # return to the latest lab
 |---|---|---|
 | Lab 1 | `lab1-complete` | Entra ID sign-in + JWT claims dashboard |
 | Lab 2 | `lab2-complete` | Microsoft Graph `/me` profile integration |
-| Lab 3 | *(in progress)* | Role-based UI from Entra ID app roles |
+| Lab 3 | `lab3-complete` | Financial Export with Layered Governance (GGS + FSC) |
 | Lab 4 | — | Deploy to Azure Static Web Apps |
 
 Each lab also introduces a deeper layer of SpecKit governance — from basic authentication principles (Lab 1) to a full project-wide security policy via Global Governance Standards (Lab 2 onwards).
@@ -707,6 +707,329 @@ Before marking Lab 2 complete, verify each item:
 - [ ] `ProfileCard` contains no MSAL imports *(plan Key Decision #5)*
 - [ ] `AbortController` cleanup present in `useEffect` return *(FR-011)*
 - [ ] `npm run build` passes with no errors *(T029)*
+
+---
+
+# Lab 3: Financial Export with Layered Governance
+
+## Overview
+
+Lab 3 introduces **Layered Governance** — the most important security pattern in the SpecKit methodology. Building on the Global Governance Standards (GGS) established in Lab 2, this lab introduces **Feature-Specific Controls (FSCs)**: security constraints defined in the spec *before any code is written*, scoped to a single high-sensitivity feature, and enforced by construction.
+
+The feature is a **Financial Export panel** that only renders for users holding the `Financial.Auditor` Entra ID App Role. It demonstrates three things working together that are rarely seen in AI-assisted development:
+
+1. **The spec defined the security controls** — not the developer's memory, not a post-hoc review
+2. **The AI generated code that satisfies those controls** — because the spec was the prompt
+3. **The controls are auditable by grep** — not by reading every function
+
+This is the core thesis of the entire lab series: **moving from prompt engineering to spec-driven development shifts security to the beginning of the SDLC**.
+
+---
+
+## Why This Lab Matters for Security
+
+Without a spec, asking an AI to "add a financial export feature" reliably produces:
+- A button visible to all authenticated users — no role check
+- Raw account numbers rendered directly into the DOM
+- No record of who accessed what, or when
+- Security added as an afterthought — if at all
+
+This is not because the AI is careless. It is because the AI generates code that matches patterns in its training data, and most training data does not implement step-up RBAC, PII masking, or pre-action audit logging. SpecKit changes this by making security a **pre-condition of code generation**, not a post-condition of code review.
+
+| Without SpecKit | With SpecKit (FSC) |
+|---|---|
+| Export visible to all authenticated users | FSC-EXPORT-001 mandates `hasRole()` double-gate before render and invocation |
+| Raw account number in DOM | FSC-EXPORT-002 mandates `maskAccountNumber()` — unmasked value never enters component state |
+| No audit trail | FSC-EXPORT-003 mandates `auditExportAttempt()` fires before any data is returned |
+| Security reviewed after code exists | Security written into the spec before the first file is created |
+
+---
+
+## The Layered Governance Model
+
+Lab 3 operates at two layers simultaneously:
+
+**Layer 1 — Global Governance Standards (GGS)**: Defined in `.specify/memory/constitution.md` v3.0.0. Apply to every feature in the project. The Financial Export feature inherits all five GGS standards from Lab 2 — authentication gating, no hardcoded secrets, token governance, least-privilege scopes, and safe UI rendering.
+
+**Layer 2 — Feature-Specific Controls (FSCs)**: Defined in `specs/003-financial-export/spec.md`. Apply only to this feature. FSCs can only *add* constraints — they can never relax a GGS standard.
+
+```
+constitution.md (v3.0.0)
+└── GGS-001: Auth gating             ← applies to ALL features
+└── GGS-002: No hardcoded secrets    ← applies to ALL features
+└── GGS-003: Token governance        ← applies to ALL features
+└── GGS-004: Least-privilege scopes  ← applies to ALL features
+└── GGS-005: Safe UI rendering       ← applies to ALL features
+
+specs/003-financial-export/spec.md
+└── FSC-EXPORT-001: Step-up RBAC     ← Financial Export only
+└── FSC-EXPORT-002: PII masking      ← Financial Export only
+└── FSC-EXPORT-003: Audit trail      ← Financial Export only
+```
+
+This mirrors how real security frameworks operate: a global policy floor with feature-specific high-water marks layered on top.
+
+---
+
+## What You Will Build
+
+Extending the Lab 2 dashboard with:
+
+- A **`Financial.Auditor` App Role** defined in `main.bicep` and published to the Entra ID App Registration
+- A **render gate** in `Dashboard.tsx` — the panel only renders if the signed-in user holds the role
+- A **`FinancialExportCard` component** with an invocation gate — role checked again inside the click handler, not just at render time (prevents UI-bypass attacks)
+- A **`maskAccountNumber()` utility** — account numbers masked *before* they enter component state; the raw value never touches the DOM
+- An **`auditExportAttempt()` service** — fires before any data is returned, with a `console.warn` fallback if App Insights is not configured
+- A **`hasRole()` pure function** — default-deny, no MSAL dependency, independently testable
+- An **`AppRole` const** — `'Financial.Auditor'` lives in exactly one file; compliance auditable in one grep command
+
+---
+
+## Learning Objectives
+
+### SpecKit Governance
+- How to evolve the **constitution** to v3.0.0 with the Layered Governance Model
+- How **FSCs** are defined in the spec and traced directly to implementation — every control has a citation
+- How SpecKit tasks enforce a **developer/infra responsibility boundary** — T001 (Bicep app role definition) is developer-owned; T002–T004 (deploy, group creation, role assignment) are infra/admin-owned
+- How the **grep-auditable single source of truth** pattern makes security properties visible without reading every function
+
+### Security Engineering
+- How **Entra ID App Roles** work — why `roles` claims are preferred over `groups` claims for application RBAC, and how security groups map to roles in Enterprise Applications
+- How a **double-gate** (render gate + invocation gate) defends against UI-bypass attacks
+- How **PII masking** applied before state assignment prevents accidental DOM exposure, even in edge cases
+- How **pre-action audit logging** satisfies trail requirements for both granted and denied attempts
+
+### Architecture
+- How to keep `hasRole()` as a pure function — making it portable and independently testable without mocking MSAL
+- How to structure telemetry with a `console.warn` fallback so missing configuration never causes a runtime failure
+- How the `AppRole` const pattern makes role strings refactorable and auditable in one command
+
+---
+
+## Prerequisites
+
+Completion of Lab 2 (`git checkout lab2-complete` as your starting point), plus:
+
+| Requirement | Notes |
+|---|---|
+| Lab 2 complete | Dashboard with ProfileCard working |
+| `Application.ReadWrite.OwnedBy` | Required to deploy `appRoles` via Bicep |
+| Enterprise Applications access | Required to assign the role to users/groups (T003) |
+
+---
+
+## Lab 3 Architecture
+
+```
+src/
+├── roles.ts                         # NEW — AppRole const (single source of truth)
+├── utils/
+│   ├── securityUtils.ts             # NEW — hasRole() pure fn, default-deny
+│   └── mask.ts                      # NEW — maskAccountNumber() PII masking
+├── types/
+│   ├── graph.ts                     # unchanged
+│   └── financial.ts                 # NEW — FinancialRecord interface
+├── services/
+│   ├── graphService.ts              # unchanged
+│   └── auditService.ts              # NEW — auditExportAttempt() pre-action telemetry
+└── components/
+    ├── FinancialExportCard.tsx      # NEW — invocation gate + masked display
+    └── Dashboard.tsx               # MODIFIED — render gate + FinancialExportCard
+```
+
+**Dependency rules**:
+- `hasRole()` has no MSAL imports — pure function, no side effects
+- `FinancialExportCard` has no MSAL imports — receives `claims` as a prop
+- `auditService` reads only from `import.meta.env` — no component dependencies
+- The string `'Financial.Auditor'` exists in exactly one file: `src/roles.ts`
+
+---
+
+## Feature-Specific Controls (FSCs)
+
+Defined in `specs/003-financial-export/spec.md`. These layer on top of all inherited GGS standards.
+
+| Control | Rule | Implementation |
+|---|---|---|
+| FSC-EXPORT-001 | Step-up RBAC — `Financial.Auditor` role required | `hasRole()` double-gate: render gate in `Dashboard` + invocation gate in `FinancialExportCard` handler |
+| FSC-EXPORT-002 | PII masking — account numbers masked before state | `maskAccountNumber()` applied before `setRecord()` — raw value never in DOM |
+| FSC-EXPORT-003 | Audit trail — every attempt logged before action | `auditExportAttempt(upn, status)` called before data is fetched or returned |
+
+---
+
+## Step-by-Step Instructions
+
+### Step 1: Start from Lab 2
+
+```bash
+git checkout master   # or git checkout lab3-complete to see the finished result
+```
+
+---
+
+### Step 2: Evolve the Constitution (`/speckit.constitution`)
+
+In Copilot chat, run `/speckit.constitution` to add the Layered Governance Model:
+
+```
+Add a Layered Governance Model section.
+
+GGS (Global Governance Standards) — defined in constitution.md — apply to all features.
+FSC (Feature-Specific Controls) — defined in individual spec.md files — apply to one feature only.
+
+FSC rules:
+- FSCs may only add constraints. They may never relax a GGS standard.
+- Each FSC must be numbered (FSC-<FEATURE>-NNN).
+- Every spec must declare which GGS standards it inherits.
+- Violations of FSC controls are named and citeable, same as GGS violations.
+```
+
+This evolves `.specify/memory/constitution.md` to v3.0.0.
+
+---
+
+### Step 3: Write the Feature Spec (`/speckit.specify`)
+
+In Copilot chat, run `/speckit.specify` with:
+
+```
+Feature: High-Sensitivity Financial Export
+
+As a Financial Auditor, I need to export a masked summary of financial records.
+
+FSC-EXPORT-001: Access gated by Financial.Auditor App Role (step-up RBAC on top of GGS-001).
+FSC-EXPORT-002: All account numbers masked to last 4 digits before rendering.
+FSC-EXPORT-003: Every export attempt (granted or denied) logged before action is taken.
+```
+
+This creates `specs/003-financial-export/spec.md` with the GGS inheritance table and FSC definitions.
+
+---
+
+### Step 4: Write the Implementation Plan (`/speckit.plan`)
+
+In Copilot chat, run `/speckit.plan`. This creates `specs/003-financial-export/plan.md` with architecture decisions, GGS+FSC compliance mapping, and the developer/infra responsibility boundary.
+
+---
+
+### Step 5: Generate the Task List (`/speckit.tasks`)
+
+In Copilot chat, run `/speckit.tasks`. This creates `specs/003-financial-export/tasks.md` with 36 tasks across 7 phases. Note: Phase 1 is explicitly split into developer tasks (T001) and infra/admin tasks (T002–T004) — a SpecKit-enforced responsibility boundary.
+
+---
+
+### Step 6: Update `main.bicep` and Deploy (T001–T004)
+
+**T001 — Developer task:** Add `appRoles` to `main.bicep` (generate a UUID with `uuidgen`):
+
+```bicep
+appRoles: [
+  {
+    id: '<uuidgen output>'
+    allowedMemberTypes: ['User']
+    displayName: 'Financial Auditor'
+    description: 'Can access and export financial data'
+    value: 'Financial.Auditor'
+    isEnabled: true
+  }
+]
+```
+
+**T002 — Deploy:**
+```bash
+az deployment group create \
+  --resource-group <your-rg> \
+  --template-file main.bicep
+```
+
+**T003 — Assign role:** Azure Portal → **Enterprise Applications** → your app → **Users and Groups** → **Add user/group** → assign **Financial Auditor**.
+
+> **Enterprise pattern**: assign a **security group** to the role rather than individual users. Group members automatically receive `Financial.Auditor` in their `roles` claim.
+
+**T004 — Verify:** Sign out and back in. The `roles: ["Financial.Auditor"]` claim should appear in the Lab 1 claims table.
+
+---
+
+### Step 7: Implement (`/speckit.implement`)
+
+Work through phases using `/speckit.implement`. Key files:
+
+**`src/roles.ts`** *(FSC-EXPORT-001)*
+```typescript
+export const AppRole = {
+  FinancialAuditor: 'Financial.Auditor',
+} as const
+```
+
+**`src/utils/securityUtils.ts`** *(FSC-EXPORT-001)*
+```typescript
+export function hasRole(claims: IdTokenClaims | undefined, role: string): boolean {
+  if (!claims?.roles || !Array.isArray(claims.roles)) return false
+  return claims.roles.includes(role)
+}
+```
+
+**`src/utils/mask.ts`** *(FSC-EXPORT-002)*
+```typescript
+export function maskAccountNumber(value: string): string {
+  const match = value.match(/(\d{4})$/)
+  if (!match) return '****'
+  return `****${match[1]}`
+}
+```
+
+**Render gate in `Dashboard.tsx`** *(FSC-EXPORT-001)*
+```tsx
+{hasRole(account?.idTokenClaims, AppRole.FinancialAuditor) ? (
+  <FinancialExportCard claims={account!.idTokenClaims!} />
+) : (
+  <p>Financial export is not available for your account.</p>
+)}
+```
+
+---
+
+### Step 8: Verify
+
+```bash
+npm run build   # must pass clean
+npm run dev
+```
+
+**T031 — Role-positive:** Sign in as a user with `Financial.Auditor`. Export button appears. Data renders as `****5678`. *(FSC-EXPORT-001, FSC-EXPORT-002)*
+
+**T032 — DOM masking audit** — run in DevTools Console after clicking Export:
+```js
+document.body.innerHTML.includes('00012345678')  // must return false
+```
+
+**T033 — Role-negative:** Sign in as a user without the role. Sees *"Financial export is not available for your account."* — button never rendered. *(FSC-EXPORT-001)*
+
+**T034 — Audit fires before action:** DevTools Console shows `[auditService] VITE_APPINSIGHTS_CONNECTION_STRING is not set` on every export — confirming the audit fires before data is returned. *(FSC-EXPORT-003)*
+
+**T036 — Grep audit:**
+```bash
+grep -rn "Financial.Auditor" src/ --include="*.ts" --include="*.tsx"
+# Expected: 1 match — src/roles.ts only
+```
+
+---
+
+## Security Audit Checklist
+
+Before marking Lab 3 complete, verify each item:
+
+- [ ] `'Financial.Auditor'` string exists only in `src/roles.ts` *(FSC-EXPORT-001)*
+- [ ] `hasRole()` has no MSAL imports — pure function *(plan Key Decision #1)*
+- [ ] Render gate in `Dashboard.tsx` — export panel not rendered for users without the role *(FSC-EXPORT-001)*
+- [ ] Invocation gate in `FinancialExportCard` handler — role re-checked before data returned *(FSC-EXPORT-001)*
+- [ ] `maskAccountNumber()` called before `setRecord()` — raw value never in component state *(FSC-EXPORT-002)*
+- [ ] `auditExportAttempt()` called before export data is generated — not after *(FSC-EXPORT-003)*
+- [ ] `console.warn` fallback fires when `VITE_APPINSIGHTS_CONNECTION_STRING` is absent *(GGS-002)*
+- [ ] `npm run build` passes with no errors
+- [ ] Unmasked account number not found in DOM via DevTools search *(FSC-EXPORT-002)*
+
+---
 
 ## Expanding the ESLint configuration
 
