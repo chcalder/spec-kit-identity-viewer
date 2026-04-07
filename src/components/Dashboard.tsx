@@ -2,8 +2,11 @@ import { useState, useEffect, useRef } from 'react'
 import { useMsal, useAccount } from '@azure/msal-react'
 import { type GraphProfile } from '../types/graph'
 import { fetchGraphProfile } from '../services/graphService'
+import { AppRole } from '../roles'
+import { hasRole } from '../utils/securityUtils'
 import ClaimsTable from './ClaimsTable'
 import ProfileCard from './ProfileCard'
+import FinancialExportCard from './FinancialExportCard'
 
 export default function Dashboard() {
   const { instance, accounts } = useMsal()
@@ -86,6 +89,19 @@ export default function Dashboard() {
           ) : profile ? (
             <ProfileCard profile={profile} />
           ) : null}
+        </div>
+
+        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+          Financial Export
+        </h3>
+        <div className="mb-8">
+          {hasRole(account?.idTokenClaims, AppRole.FinancialAuditor) ? (
+            <FinancialExportCard claims={account!.idTokenClaims!} />
+          ) : (
+            <p className="text-sm text-gray-400 italic">
+              Financial export is not available for your account.
+            </p>
+          )}
         </div>
 
         <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">

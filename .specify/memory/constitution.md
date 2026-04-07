@@ -73,4 +73,27 @@ When a suggestion violates one of the above, cite the standard by ID (e.g. "GGS-
 ### Scaffolding Safety Rule
 Never scaffold new tooling (Vite, CRA, etc.) into an existing project directory using destructive flags such as `--overwrite`. Always scaffold into a **new empty directory first**, then copy or merge files in. The `.specify/` and `specs/` directories must never be deleted or overwritten.
 
-**Version**: 2.0.0 | **Ratified**: 2026-04-05 | **Last Amended**: 2026-04-05
+### Layered Governance Model
+
+The GGS standards above are the **global security floor** — the minimum acceptable behaviour for every feature in this project. They are permanent and non-negotiable.
+
+For high-risk features, individual feature specs may define **Feature-Specific Controls (FSCs)** that raise the security bar beyond the global baseline. FSCs live in the feature's `spec.md` and apply **only to that feature**. They do not modify the constitution and do not affect other features.
+
+This resolves the false choice between:
+- A narrow global policy (missing controls for sensitive surfaces), and
+- An over-specified global policy (burdening simple components with rules they don't need)
+
+**The model:**
+
+| Layer | Defined in | Scope | Examples |
+|---|---|---|---|
+| Global Governance Standards (GGS) | `constitution.md` | All features, always | Auth gating, PKCE, token patterns, XSS prevention |
+| Feature-Specific Controls (FSC) | `specs/NNN/spec.md` | This feature only | RBAC enforcement, data masking, export audit logging |
+
+**Rules for FSCs:**
+1. FSCs may only *add* constraints — they may never relax or override a GGS standard
+2. FSCs must be explicitly numbered within the spec (e.g. `FSC-ROLES-001`)
+3. The feature spec must declare which GGS standards it inherits and confirm they remain satisfied
+4. An AI-generated suggestion that violates an FSC is a **feature-level violation** and must be corrected before acceptance
+
+**Version**: 3.0.0 | **Ratified**: 2026-04-05 | **Last Amended**: 2026-04-05

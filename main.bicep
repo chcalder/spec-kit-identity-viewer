@@ -22,6 +22,19 @@ resource app 'Microsoft.Graph/applications@v1.0' = {
     }
   }
 
+  // App Roles — used for RBAC within the application
+  // Financial.Auditor: grants access to the Financial Export feature (FSC-EXPORT-001)
+  appRoles: [
+    {
+      id: '3ced9ea6-a919-47bb-852f-ec206e5e06be'
+      allowedMemberTypes: ['User']
+      displayName: 'Financial Auditor'
+      description: 'Can access and export financial data'
+      value: 'Financial.Auditor'
+      isEnabled: true
+    }
+  ]
+
   // Delegated permissions against Microsoft Graph
   requiredResourceAccess: [
     {
