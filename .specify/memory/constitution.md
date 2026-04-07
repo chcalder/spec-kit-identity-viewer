@@ -4,9 +4,9 @@
 
 | Key | Value |
 |---|---|
-| Client ID | `YOUR_CLIENT_ID` |
-| Tenant ID | `YOUR_TENANT_ID` |
-| Authority | `https://login.microsoftonline.com/YOUR_TENANT_ID` |
+| Client ID | `<YOUR_CLIENT_ID>` |
+| Tenant ID | `<YOUR_TENANT_ID>` |
+| Authority | `https://login.microsoftonline.com/<YOUR_TENANT_ID>` |
 
 ## Global Governance Standards (GGS)
 

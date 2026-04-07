@@ -121,7 +121,7 @@ The signed-in user can click a Logout button to end their session and return to 
 
 ## Assumptions
 
-- The Entra ID App Registration is already provisioned with Client ID `YOUR_CLIENT_ID` and Tenant ID `YOUR_TENANT_ID`.
+- The Entra ID App Registration is already provisioned with Client ID `<YOUR_CLIENT_ID>` and Tenant ID `<YOUR_TENANT_ID>`.
 - The SPA redirect URIs `http://localhost:3000` and `http://localhost:3001` are registered in the App Registration.
 - The app runs locally during development; `window.location.origin` is used dynamically for the redirect URI.
 - Mobile/responsive layout is out of scope for v1; desktop viewport is the target.

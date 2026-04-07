@@ -1,3 +1,116 @@
+# Agentic SDLC Labs: Spec-Driven Security with SpecKit and Microsoft Entra ID
+
+## About This Lab Series
+
+This is a hands-on lab series that teaches you how to use **SpecKit** — a structured AI development workflow — to build secure, identity-aware applications on Azure. Each lab builds on the previous one in a single codebase, progressing from a basic sign-in flow to a production-grade security governance model.
+
+The central thesis: **when security is defined in the spec before the AI writes any code, it stops being something you add at the end and becomes something the code is generated to satisfy from the beginning.** This lab series is designed to make that idea concrete and repeatable.
+
+---
+
+## What Is SpecKit?
+
+SpecKit is a set of VS Code Copilot slash commands that bring structure to AI-assisted development. Instead of asking Copilot to "build me a feature" and hoping the output is secure and well-architected, SpecKit guides you through a deliberate sequence:
+
+| Command | Purpose | What It Produces |
+|---|---|---|
+| `/speckit.constitution` | Define project-wide principles and security standards | `.specify/memory/constitution.md` — injected into every subsequent command |
+| `/speckit.specify` | Write user stories, acceptance criteria, and feature requirements | `specs/NNN-feature/spec.md` |
+| `/speckit.plan` | Make architecture and technology decisions before writing code | `specs/NNN-feature/plan.md` |
+| `/speckit.tasks` | Break the plan into independently testable increments | `specs/NNN-feature/tasks.md` |
+| `/speckit.implement` | Execute tasks phase-by-phase with AI assistance | Source code |
+
+The key insight is that the **constitution is injected as context** for every subsequent command. This means the AI generates code that is constrained by your security standards, not by whatever pattern appeared most often in its training data.
+
+---
+
+## What You Will Learn
+
+By completing all three labs, you will be proficient in:
+
+### SpecKit Workflow
+- Using all five SpecKit slash commands in the correct sequence
+- Writing a **constitution** that acts as a project-wide security policy
+- Writing **feature specs** with traceable requirements and acceptance scenarios
+- Using an **implementation plan** to resolve architecture questions before any code is generated
+- Breaking work into **phased tasks** with an auditable responsibility boundary between developer and infra/admin
+
+### Security Engineering in the SDLC
+- How to define **Global Governance Standards (GGS)** that apply to every feature across the entire project
+- How to define **Feature-Specific Controls (FSCs)** that add security constraints for high-sensitivity features — and why they can never relax a GGS standard
+
+### Azure Identity Platform
+- Provisioning **Entra ID App Registrations** with Azure Bicep using the Microsoft Graph extension
+- Authenticating users with **MSAL v5** (`@azure/msal-react` + `@azure/msal-browser`) using Authorization Code Flow with PKCE
+- Acquiring **access tokens** silently via `acquireTokenSilent` and handling `InteractionRequiredAuthError`
+- Calling **Microsoft Graph API** with a Bearer token
+- Working with **App Roles** — how they are defined in Bicep, published to the manifest, assigned to users or security groups, and surfaced as `roles` claims in the ID token
+
+---
+
+## Lab Progression
+
+Each lab introduces a deeper layer of SpecKit governance and a new security capability:
+
+| Lab | Git Tag | New Security Capability | New SpecKit Concept |
+|---|---|---|---|
+| Lab 1 | `lab1-complete` | Entra ID auth + JWT claims visibility | Constitution, spec, plan, tasks, implement |
+| Lab 2 | `lab2-complete` | Global Governance Standards (GGS-001–005) | Constitution as project-wide security policy |
+| Lab 3 | `lab3-complete` | Layered Governance — FSC step-up RBAC, PII masking, audit trail | FSCs on top of inherited GGS standards |
+
+The same codebase runs across all labs. Use git tags to navigate:
+```bash
+git checkout lab1-complete   # see the exact state at the end of Lab 1
+git checkout lab2-complete   # see the exact state at the end of Lab 2
+git checkout lab3-complete   # see the exact state at the end of Lab 3
+git checkout master          # return to latest
+```
+
+---
+
+## Getting Started — Prerequisites
+
+Before beginning Lab 1, ensure the following are in place:
+
+### Tools
+| Tool | Version | How to Check |
+|---|---|---|
+| Node.js | 20+ | `node --version` |
+| Azure CLI | Latest | `az --version` |
+| Bicep CLI | 0.36.1+ | `az bicep version` |
+| VS Code | Latest | — |
+| Git | Any | `git --version` |
+
+### VS Code Extensions
+Install the following before starting:
+```bash
+code --install-extension GitHub.copilot
+code --install-extension GitHub.copilot-chat
+code --install-extension ms-azuretools.vscode-bicep
+code --install-extension ms-vscode.azure-account
+```
+
+### Azure Access
+- An Azure account with permission to **create App Registrations** (`Application.ReadWrite.OwnedBy` or `Application.ReadWrite.All`)
+- An active Azure subscription with permission to create resource groups
+
+### SpecKit
+Install SpecKit in VS Code:
+```bash
+code --install-extension specstory.specstory-vscode
+```
+
+Then initialise SpecKit in your project folder:
+```bash
+mkdir spec-kit-identity-viewer
+cd spec-kit-identity-viewer
+specify init --integration copilot
+```
+
+> ⚠️ **Important**: Always run `specify init` and complete SpecKit setup **before** scaffolding any tooling (Vite, npm, etc.). The `.specify/` folder must exist before you run `/speckit.constitution`. Never run `npm create vite` with `--overwrite` — it will delete `.specify/` and all your spec files.
+
+---
+
 # Lab 1: React SPA Identity Claims Viewer
 
 ## Overview

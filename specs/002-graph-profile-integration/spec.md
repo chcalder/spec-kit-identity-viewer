@@ -132,7 +132,7 @@ As an authenticated user, if the Graph call fails (e.g. due to an expired or ins
 
 ## Assumptions
 
-- The Entra ID App Registration (`YOUR_CLIENT_ID`) already has `User.Read` delegated permission granted.
+- The Entra ID App Registration (`<YOUR_CLIENT_ID>`) already has `User.Read` delegated permission granted.
 - The `User.Read` scope is sufficient to return `jobTitle`, `officeLocation`, and `preferredLanguage` from the `/v1.0/me` endpoint.
 - The existing `ClaimsTable` and `Dashboard` components from Lab 1 remain unchanged by this feature.
 - The `ProfileCard` is additive — it appears alongside the existing claims table, not replacing it.

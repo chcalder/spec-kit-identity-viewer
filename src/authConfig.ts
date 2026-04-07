@@ -2,8 +2,8 @@ import { type Configuration, LogLevel } from '@azure/msal-browser';
 
 export const msalConfig: Configuration = {
   auth: {
-    clientId: 'YOUR_CLIENT_ID',
-    authority: 'https://login.microsoftonline.com/YOUR_TENANT_ID',
+    clientId: '<YOUR_CLIENT_ID>',         // Replace with clientId from Bicep deployment output
+    authority: 'https://login.microsoftonline.com/<YOUR_TENANT_ID>', // Replace with tenantId from Bicep deployment output
     redirectUri: window.location.origin,
   },
   cache: {
