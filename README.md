@@ -1,16 +1,16 @@
-# Agentic SDLC Labs: Spec-Driven Security with SpecKit and Microsoft Entra ID
+# Agentic SDLC Labs: Spec-Driven Security with Spec-Kit and Microsoft Entra ID
 
 ## About This Lab Series
 
-This is a hands-on lab series that teaches you how to use **[SpecKit](https://github.com/github/spec-kit)** ([docs](https://github.github.com/spec-kit/)) — a structured AI development workflow — to build secure, identity-aware applications on Azure. Each lab builds on the previous one in a single codebase, progressing from a basic sign-in flow to a production-grade security governance model.
+This is a hands-on lab series that teaches you how to use **[Spec-Kit](https://github.com/github/spec-kit)** ([docs](https://github.github.com/spec-kit/)) — a structured AI development workflow — to build secure, identity-aware applications on Azure. Each lab builds on the previous one in a single codebase, progressing from a basic sign-in flow to a production-grade security governance model.
 
 The central thesis: **when security is defined in the spec before the AI writes any code, it stops being something you add at the end and becomes something the code is generated to satisfy from the beginning.** This lab series is designed to make that idea concrete and repeatable.
 
 ---
 
-## What Is SpecKit?
+## What Is Spec-Kit?
 
-[SpecKit](https://github.com/github/spec-kit) ([official docs](https://github.github.com/spec-kit/)) is a set of VS Code Copilot slash commands that bring structure to AI-assisted development. Instead of asking Copilot to "build me a feature" and hoping the output is secure and well-architected, SpecKit guides you through a deliberate sequence:
+[Spec-Kit](https://github.com/github/spec-kit) ([official docs](https://github.github.com/spec-kit/)) is a set of VS Code Copilot slash commands that bring structure to AI-assisted development. Instead of asking Copilot to "build me a feature" and hoping the output is secure and well-architected, Spec-Kit guides you through a deliberate sequence:
 
 | Command | Purpose | What It Produces |
 |---|---|---|
@@ -28,8 +28,8 @@ The key insight is that the **constitution is injected as context** for every su
 
 By completing all three labs, you will be proficient in:
 
-### SpecKit Workflow
-- Using all five SpecKit slash commands in the correct sequence
+### Spec-Kit Workflow
+- Using all five Spec-Kit slash commands in the correct sequence
 - Writing a **constitution** that acts as a project-wide security policy
 - Writing **feature specs** with traceable requirements and acceptance scenarios
 - Using an **implementation plan** to resolve architecture questions before any code is generated
@@ -50,9 +50,9 @@ By completing all three labs, you will be proficient in:
 
 ## Lab Progression
 
-Each lab introduces a deeper layer of SpecKit governance and a new security capability:
+Each lab introduces a deeper layer of Spec-Kit governance and a new security capability:
 
-| Lab | Git Tag | New Security Capability | New SpecKit Concept |
+| Lab | Git Tag | New Security Capability | New Spec-Kit Concept |
 |---|---|---|---|
 | Lab 1 | `lab1-complete` | Entra ID auth + JWT claims visibility | Constitution, spec, plan, tasks, implement |
 | Lab 2 | `lab2-complete` | Global Governance Standards (GGS-001–005) | Constitution as project-wide security policy |
@@ -94,20 +94,20 @@ code --install-extension ms-vscode.azure-account
 - An Azure account with permission to **create App Registrations** (`Application.ReadWrite.OwnedBy` or `Application.ReadWrite.All`)
 - An active Azure subscription with permission to create resource groups
 
-### SpecKit
-Install [SpecKit](https://github.com/github/spec-kit) in VS Code ([official docs](https://github.github.com/spec-kit/)):
+### Spec-Kit
+Install [Spec-Kit](https://github.com/github/spec-kit) in VS Code ([official docs](https://github.github.com/spec-kit/)):
 ```bash
 code --install-extension specstory.specstory-vscode
 ```
 
-Then initialise SpecKit in your project folder:
+Then initialise Spec-Kit in your project folder:
 ```bash
 mkdir spec-kit-identity-viewer
 cd spec-kit-identity-viewer
 specify init --integration copilot
 ```
 
-> ⚠️ **Important**: Always run `specify init` and complete SpecKit setup **before** scaffolding any tooling (Vite, npm, etc.). The `.specify/` folder must exist before you run `/speckit.constitution`. Never run `npm create vite` with `--overwrite` — it will delete `.specify/` and all your spec files.
+> ⚠️ **Important**: Always run `specify init` and complete Spec-Kit setup **before** scaffolding any tooling (Vite, npm, etc.). The `.specify/` folder must exist before you run `/speckit.constitution`. Never run `npm create vite` with `--overwrite` — it will delete `.specify/` and all your spec files.
 
 ---
 
@@ -115,9 +115,9 @@ specify init --integration copilot
 
 ## Overview
 
-This lab guides you through building a **React Single-Page Application** that authenticates users via **Microsoft Entra ID** and displays all decoded JWT claims from the ID token. The app is built from scratch — from infrastructure provisioning through to a working sign-in flow — using a structured, AI-assisted development workflow powered by **SpecKit**.
+This lab guides you through building a **React Single-Page Application** that authenticates users via **Microsoft Entra ID** and displays all decoded JWT claims from the ID token. The app is built from scratch — from infrastructure provisioning through to a working sign-in flow — using a structured, AI-assisted development workflow powered by **Spec-Kit**.
 
-The lab demonstrates how SpecKit transforms the way you work with AI coding assistants, turning free-form prompts into a governed, traceable development process.
+The lab demonstrates how Spec-Kit transforms the way you work with AI coding assistants, turning free-form prompts into a governed, traceable development process.
 
 ---
 
@@ -139,8 +139,8 @@ A dark-mode React SPA that:
 
 By completing this lab, you will learn:
 
-### SpecKit Workflow
-- How to use the **SpecKit slash commands** (`/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`) as a structured AI development workflow
+### Spec-Kit Workflow
+- How to use the **Spec-Kit slash commands** (`/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`) as a structured AI development workflow
 - How a **constitution** acts as a governing document that enforces consistent decisions across the entire project
 - How to write a **feature spec** with user stories, acceptance scenarios, and functional requirements
 - How to use an **implementation plan** to make architectural decisions before writing any code
@@ -171,7 +171,7 @@ Before starting, ensure you have:
 | VS Code | Latest | |
 | VS Code Bicep extension | Latest | `ms-azuretools.vscode-bicep` |
 | Azure account | With permission to create App Registrations | |
-| SpecKit | 0.5.1+ | Installed in your project |
+| Spec-Kit | 0.5.1+ | Installed in your project |
 
 Install the Azure Account and ARM Tools extensions in VS Code:
 ```bash
@@ -189,7 +189,7 @@ spec-kit-identity-viewer/
 ├── bicepconfig.json            # Microsoft Graph Bicep extension config
 ├── .specify/
 │   └── memory/
-│       └── constitution.md     # SpecKit project constitution
+│       └── constitution.md     # Spec-Kit project constitution
 ├── specs/
 │   └── 001-entra-signin-claims-dashboard/
 │       ├── spec.md             # Feature specification
@@ -209,7 +209,7 @@ spec-kit-identity-viewer/
 
 ## Step-by-Step Instructions
 
-> ⚠️ **Important**: Always complete SpecKit setup **before** scaffolding any tooling. Never run `npm create vite` with `--overwrite` into an existing project directory — it will delete `.specify/` and `specs/`.
+> ⚠️ **Important**: Always complete Spec-Kit setup **before** scaffolding any tooling. Never run `npm create vite` with `--overwrite` into an existing project directory — it will delete `.specify/` and `specs/`.
 
 ---
 
@@ -222,7 +222,7 @@ mkdir spec-kit-identity-viewer
 cd spec-kit-identity-viewer
 ```
 
-Initialise SpecKit inside it:
+Initialise Spec-Kit inside it:
 
 ```bash
 specify init --integration copilot
@@ -457,11 +457,11 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | App Registration not created after deploy | Missing Graph API permissions on deploying user | Deploying user needs `Application.ReadWrite.OwnedBy` or `Application.ReadWrite.All` |
 | Port auto-increments to 3001 | Port 3000 already in use | Already handled by `window.location.origin` — both ports are registered in Bicep |
 | Claims table empty / double login required | `redirectUri` mismatch | Use `window.location.origin` — never hardcode `localhost:3000` |
-| `.specify/` folder missing after scaffold | Used `--overwrite` when running `npm create vite` | Never use `--overwrite` in an existing SpecKit project — scaffold into an empty folder first |
+| `.specify/` folder missing after scaffold | Used `--overwrite` when running `npm create vite` | Never use `--overwrite` in an existing Spec-Kit project — scaffold into an empty folder first |
 
 ---
 
-## SpecKit Commands Reference
+## Spec-Kit Commands Reference
 
 | Command | Purpose | Output |
 |---|---|---|
@@ -489,7 +489,7 @@ git checkout master          # return to the latest lab
 | Lab 3 | `lab3-complete` | Financial Export with Layered Governance (GGS + FSC) |
 | Lab 4 | — | Deploy to Azure Static Web Apps |
 
-Each lab also introduces a deeper layer of SpecKit governance — from basic authentication principles (Lab 1) to a full project-wide security policy via Global Governance Standards (Lab 2 onwards).
+Each lab also introduces a deeper layer of Spec-Kit governance — from basic authentication principles (Lab 1) to a full project-wide security policy via Global Governance Standards (Lab 2 onwards).
 
 ---
 
@@ -497,7 +497,7 @@ Each lab also introduces a deeper layer of SpecKit governance — from basic aut
 
 ## Overview
 
-Lab 2 extends the Lab 1 SPA by calling the **Microsoft Graph API** to retrieve live corporate profile data from Entra ID. It demonstrates how SpecKit's **Global Governance Standards (GGS)** function as a project-wide security policy — governing not just the new feature, but all code past and future.
+Lab 2 extends the Lab 1 SPA by calling the **Microsoft Graph API** to retrieve live corporate profile data from Entra ID. It demonstrates how Spec-Kit's **Global Governance Standards (GGS)** function as a project-wide security policy — governing not just the new feature, but all code past and future.
 
 The central lesson: in AI-assisted development, **the spec is the security control**. When you define token acquisition patterns, scope restrictions, and component boundaries in the constitution before any code is generated, the AI writes to those constraints rather than to insecure defaults from its training data.
 
@@ -511,9 +511,9 @@ Without a governing spec, asking an AI to "add a Graph API call" reliably produc
 - Silent error swallowing when tokens expire
 - No handling of `InteractionRequiredAuthError`
 
-These are the most common patterns in publicly available code — and therefore the most common patterns in AI training data. SpecKit interrupts this by requiring a **constitution** and **spec** before code generation, injecting security requirements as prompt constraints.
+These are the most common patterns in publicly available code — and therefore the most common patterns in AI training data. Spec-Kit interrupts this by requiring a **constitution** and **spec** before code generation, injecting security requirements as prompt constraints.
 
-| Without SpecKit | With SpecKit (GGS) |
+| Without Spec-Kit | With Spec-Kit (GGS) |
 |---|---|
 | AI guesses a token strategy | GGS-003 mandates `acquireTokenSilent` |
 | Scope strings appear in components | GGS-004 requires centralisation in `authConfig.ts` |
@@ -539,7 +539,7 @@ Extending the Lab 1 dashboard with:
 
 ## Learning Objectives
 
-### SpecKit Governance
+### Spec-Kit Governance
 - How to evolve the **constitution** from Lab 1 principles to v2.0.0 with explicit Global Governance Standards
 - How GGS standards act as **named violations** — reviewable, citeable, and reject-able by ID
 - How the Guardrail Effect works: constitution as prompt bias, not hard enforcement — and why human review remains essential
@@ -827,7 +827,7 @@ Before marking Lab 2 complete, verify each item:
 
 ## Overview
 
-Lab 3 introduces **Layered Governance** — the most important security pattern in the SpecKit methodology. Building on the Global Governance Standards (GGS) established in Lab 2, this lab introduces **Feature-Specific Controls (FSCs)**: security constraints defined in the spec *before any code is written*, scoped to a single high-sensitivity feature, and enforced by construction.
+Lab 3 introduces **Layered Governance** — the most important security pattern in the Spec-Kit methodology. Building on the Global Governance Standards (GGS) established in Lab 2, this lab introduces **Feature-Specific Controls (FSCs)**: security constraints defined in the spec *before any code is written*, scoped to a single high-sensitivity feature, and enforced by construction.
 
 The feature is a **Financial Export panel** that only renders for users holding the `Financial.Auditor` Entra ID App Role. It demonstrates three things working together that are rarely seen in AI-assisted development:
 
@@ -847,9 +847,9 @@ Without a spec, asking an AI to "add a financial export feature" reliably produc
 - No record of who accessed what, or when
 - Security added as an afterthought — if at all
 
-This is not because the AI is careless. It is because the AI generates code that matches patterns in its training data, and most training data does not implement step-up RBAC, PII masking, or pre-action audit logging. SpecKit changes this by making security a **pre-condition of code generation**, not a post-condition of code review.
+This is not because the AI is careless. It is because the AI generates code that matches patterns in its training data, and most training data does not implement step-up RBAC, PII masking, or pre-action audit logging. Spec-Kit changes this by making security a **pre-condition of code generation**, not a post-condition of code review.
 
-| Without SpecKit | With SpecKit (FSC) |
+| Without Spec-Kit | With Spec-Kit (FSC) |
 |---|---|
 | Export visible to all authenticated users | FSC-EXPORT-001 mandates `hasRole()` double-gate before render and invocation |
 | Raw account number in DOM | FSC-EXPORT-002 mandates `maskAccountNumber()` — unmasked value never enters component state |
@@ -900,10 +900,10 @@ Extending the Lab 2 dashboard with:
 
 ## Learning Objectives
 
-### SpecKit Governance
+### Spec-Kit Governance
 - How to evolve the **constitution** to v3.0.0 with the Layered Governance Model
 - How **FSCs** are defined in the spec and traced directly to implementation — every control has a citation
-- How SpecKit tasks enforce a **developer/infra responsibility boundary** — T001 (Bicep app role definition) is developer-owned; T002–T004 (deploy, group creation, role assignment) are infra/admin-owned
+- How Spec-Kit tasks enforce a **developer/infra responsibility boundary** — T001 (Bicep app role definition) is developer-owned; T002–T004 (deploy, group creation, role assignment) are infra/admin-owned
 - How the **grep-auditable single source of truth** pattern makes security properties visible without reading every function
 
 ### Security Engineering
@@ -1027,7 +1027,7 @@ In Copilot chat, run `/speckit.plan`. This creates `specs/003-financial-export/p
 
 ### Step 5: Generate the Task List (`/speckit.tasks`)
 
-In Copilot chat, run `/speckit.tasks`. This creates `specs/003-financial-export/tasks.md` with 36 tasks across 7 phases. Note: Phase 1 is explicitly split into developer tasks (T001) and infra/admin tasks (T002–T004) — a SpecKit-enforced responsibility boundary.
+In Copilot chat, run `/speckit.tasks`. This creates `specs/003-financial-export/tasks.md` with 36 tasks across 7 phases. Note: Phase 1 is explicitly split into developer tasks (T001) and infra/admin tasks (T002–T004) — a Spec-Kit-enforced responsibility boundary.
 
 ---
 
