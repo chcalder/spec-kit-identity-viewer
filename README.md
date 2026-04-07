@@ -2,7 +2,7 @@
 
 ## About This Lab Series
 
-This is a hands-on lab series that teaches you how to use **SpecKit** — a structured AI development workflow — to build secure, identity-aware applications on Azure. Each lab builds on the previous one in a single codebase, progressing from a basic sign-in flow to a production-grade security governance model.
+This is a hands-on lab series that teaches you how to use **[SpecKit](https://github.com/github/spec-kit)** ([docs](https://github.github.com/spec-kit/)) — a structured AI development workflow — to build secure, identity-aware applications on Azure. Each lab builds on the previous one in a single codebase, progressing from a basic sign-in flow to a production-grade security governance model.
 
 The central thesis: **when security is defined in the spec before the AI writes any code, it stops being something you add at the end and becomes something the code is generated to satisfy from the beginning.** This lab series is designed to make that idea concrete and repeatable.
 
@@ -10,7 +10,7 @@ The central thesis: **when security is defined in the spec before the AI writes 
 
 ## What Is SpecKit?
 
-SpecKit is a set of VS Code Copilot slash commands that bring structure to AI-assisted development. Instead of asking Copilot to "build me a feature" and hoping the output is secure and well-architected, SpecKit guides you through a deliberate sequence:
+[SpecKit](https://github.com/github/spec-kit) ([official docs](https://github.github.com/spec-kit/)) is a set of VS Code Copilot slash commands that bring structure to AI-assisted development. Instead of asking Copilot to "build me a feature" and hoping the output is secure and well-architected, SpecKit guides you through a deliberate sequence:
 
 | Command | Purpose | What It Produces |
 |---|---|---|
@@ -40,11 +40,11 @@ By completing all three labs, you will be proficient in:
 - How to define **Feature-Specific Controls (FSCs)** that add security constraints for high-sensitivity features — and why they can never relax a GGS standard
 
 ### Azure Identity Platform
-- Provisioning **Entra ID App Registrations** with Azure Bicep using the Microsoft Graph extension
-- Authenticating users with **MSAL v5** (`@azure/msal-react` + `@azure/msal-browser`) using Authorization Code Flow with PKCE
+- Provisioning **[Entra ID App Registrations](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)** with **[Azure Bicep](https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/overview)** using the **[Microsoft Graph Bicep extension](https://learn.microsoft.com/en-us/graph/templates/overview-bicep)**
+- Authenticating users with **[MSAL v5](https://learn.microsoft.com/en-us/entra/identity-platform/msal-overview)** (`@azure/msal-react` + `@azure/msal-browser`) using Authorization Code Flow with PKCE
 - Acquiring **access tokens** silently via `acquireTokenSilent` and handling `InteractionRequiredAuthError`
-- Calling **Microsoft Graph API** with a Bearer token
-- Working with **App Roles** — how they are defined in Bicep, published to the manifest, assigned to users or security groups, and surfaced as `roles` claims in the ID token
+- Calling the **[Microsoft Graph API](https://learn.microsoft.com/en-us/graph/overview)** with a Bearer token
+- Working with **[App Roles](https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps)** — how they are defined in Bicep, published to the manifest, assigned to users or security groups, and surfaced as `roles` claims in the ID token
 
 ---
 
@@ -95,7 +95,7 @@ code --install-extension ms-vscode.azure-account
 - An active Azure subscription with permission to create resource groups
 
 ### SpecKit
-Install SpecKit in VS Code:
+Install [SpecKit](https://github.com/github/spec-kit) in VS Code ([official docs](https://github.github.com/spec-kit/)):
 ```bash
 code --install-extension specstory.specstory-vscode
 ```
